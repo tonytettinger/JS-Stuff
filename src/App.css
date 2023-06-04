@@ -1,5 +1,6 @@
 .App {
-  text-align: center;
+  background: lightblue;
+  font-family: monospace;
 }
 
 .App-logo {
@@ -28,4 +29,9 @@
 
 .small {
   font-size: 0.75rem;
+}
+
+.maze > div{
+  text-align: left;
+  white-space: pre;
 }
