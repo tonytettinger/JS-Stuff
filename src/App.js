@@ -1,6 +1,6 @@
 import './App.css';
 import { Maze } from './Maze';
-import { PeriodicTableSpeller } from './PeriodTableSpeller';
+import { PeriodicTableSpeller } from './PeriodicTableSpeller';
 
 function App() {
   return (
