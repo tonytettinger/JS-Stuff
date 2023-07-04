@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+
 const mazeRows = `#######################################################################
 #S#                 #       # #   #     #         #     #   #         #
 # ##### ######### # ### ### # # # # ### # # ##### # ### # # ##### # ###
@@ -19,6 +21,7 @@ const mazeRows = `##############################################################
 #######################################################################`.split('\n')
 
 const mazeRowsByElements = mazeRows.map(row => row.split(""))
+const mazeOriginalCopy = structuredClone(mazeRowsByElements)
 
 const START = 'S'
 const EXIT = 'E'
@@ -37,15 +40,6 @@ const findStart = (maze) => {
     return start
 }
 
-const printMaze = (mazeRowsByElements) => {
-    const rows = mazeRowsByElements.map(row => {
-        return <><div>
-                {row.map(element => element === EMPTY ? '\u00A0' : element)}
-        </div></>
-    })
-    return rows
-}
-
 const findExit = (maze, x = undefined , y = undefined, path = []) => {
     if(x === undefined || y === undefined) {
         [y,x] = findStart(maze)
@@ -58,7 +52,7 @@ const findExit = (maze, x = undefined , y = undefined, path = []) => {
     
     maze[y][x] = PATH
 
-    path.push(String(x) + '-' + String(y))
+    path.push([x,y])
     const northStep = y+1
     const eastStep = x+1
     const southStep = y-1
@@ -98,11 +92,49 @@ const findExit = (maze, x = undefined , y = undefined, path = []) => {
 }
 
 const exitPath = findExit(mazeRowsByElements)
-export const Maze = () => <div className="maze">
-   {printMaze(mazeRowsByElements)}
-   {exitPath && (
-      <div>
-        Exit path: {exitPath.map(([x,,y]) => `(${x},${y})`).join("->")}
-      </div>
-    )}
-</div>
+
+export const Maze = () => {
+    const [dotWalkIndex, setDotWalkIndex] = useState(0)
+    const [maze, setMaze] = useState(mazeOriginalCopy)
+
+    const printMaze = (maze) => {
+        const rows = maze.map((row, rowIndex) => {
+            return <><div>
+                    {row.map((element, colIndex) => {
+                        if(element === EMPTY) return '\u00A0'
+                        return element
+                    })}
+                    
+            </div></>
+        })
+        return rows
+    }
+
+    useEffect(()=>{
+        const intervalDelay = 25
+        const walkInterval = setInterval(()=>{
+            if(dotWalkIndex <= exitPath.length-2) {
+                setDotWalkIndex((prev)=> prev+1)
+                setMaze((prevMaze)=>prevMaze.map((row, rowIndex) => {
+                    return row.map((element, colIndex) => {
+                        if(colIndex === exitPath[dotWalkIndex][0] && rowIndex === exitPath[dotWalkIndex][1]){
+                            return '.'
+                        } else {
+                            return element
+                        }
+                    })
+                }))
+            } 
+            clearInterval(walkInterval)
+        },intervalDelay)
+        return () =>{
+            clearInterval(walkInterval)
+        }
+    },[dotWalkIndex])
+
+return (
+<div className="maze">
+    {printMaze(maze)}
+    </div>
+)
+}
